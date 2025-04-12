@@ -50,7 +50,7 @@ def shor_factor(N):
         factor1 = gcd(pow(a, r // 2) - 1, N)
         factor2 = gcd(pow(a, r // 2) + 1, N)
         
-        if factor1 * factor2 == N:
+        if factor1 * factor2 == N and (factor1 > 1 and factor2 > 1):
             return factor1, factor2
 
 N = 35
