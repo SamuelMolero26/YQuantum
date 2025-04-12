@@ -5,13 +5,15 @@ from qiskit_aer import AerSimulator
 from math import gcd
 from qiskit import transpile
 import QuantumRingsLib
+from QuantumRingsLib import QuantumRingsProvider
+from quantumrings.toolkit.qiskit import QrBackendV2
 
 
 
 from math import gcd
 
 
-def order_finding(a, N):
+def order_finding(a, N, backend):
     n_qubits = int(np.ceil(np.log(N))) + 1
     
     qc = QuantumCircuit(n_qubits)
@@ -22,10 +24,11 @@ def order_finding(a, N):
     qc.measure_all()
     
     
+    transpiled_qc = transpile(qc, backend)
     
-    simulator = AerSimulator()
-    compiled_circuit = transpile(qc, simulator, optimization_level  = 3)
-    result = simulator.run(compiled_circuit, shots=1024).result()
+    
+    job = backend.run(transpiled_qc, shots = 1024)
+    result = job.result()
     counts = result.get_counts()
 
     # Extract the most frequent measurement result
@@ -33,8 +36,8 @@ def order_finding(a, N):
     return int(measured_value, 2)
     
 
-def shor_factor(N):
-    while True:  # to avoid None and get a factorization
+def shor_factor(N, backend):
+    for iteration in range(20): # to avoid None and get a factorization
         a = np.random.randint(2, N)
 
 
@@ -43,11 +46,11 @@ def shor_factor(N):
             return factor, N // factor  # Found a factor
 
 
-        r = order_finding(a, N)
+        r = order_finding(a, N, backend)
 
        # Check if r is valid
         if r is None or r % 2 != 0 or pow(a, r // 2, N) == N - 1:
-            continue  # Retry with a different 'a'
+            continue  
 
 
         factor1 = gcd(pow(a, r // 2) - 1, N)
@@ -55,6 +58,13 @@ def shor_factor(N):
         
         if factor1 * factor2 == N and (factor1 > 1 and factor2 > 1):
             return factor1, factor2
+        
+    return None
 
-N = 299
-print(f"Factoring {N}:", shor_factor(N))
+provider  = QuantumRingsProvider(token='rings-200.zQqULWzwsK1dEEYiumxQ1i6fedLpIJZi',
+    name='samueljosemolero@tamu.edu')
+backend = QrBackendV2(provider, num_qubits = 8)
+provider.active_account()
+
+
+print(shor_factor(143, backend))
