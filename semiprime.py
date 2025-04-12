@@ -60,9 +60,14 @@ def shor_factor(N, backend):
             return factor1, factor2
         
     return None
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
-provider  = QuantumRingsProvider(token='rings-200.zQqULWzwsK1dEEYiumxQ1i6fedLpIJZi',
-    name='samueljosemolero@tamu.edu')
+token = os.getenv("QUANTUM_RINGS_TOKEN")
+name = os.getenv("QUANTUM_RINGS_NAME")
+provider  = QuantumRingsProvider(token= token,
+    name= name)
 backend = QrBackendV2(provider, num_qubits = 8)
 provider.active_account()
 
