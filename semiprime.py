@@ -5,7 +5,10 @@ from qiskit_aer import AerSimulator
 from math import gcd
 from qiskit import transpile
 import QuantumRingsLib
-from QuantumRingsLib import QuantumRingsProvider
+from QuantumRingsLib import (
+    QuantumRegister, ClassicalRegister, QuantumCircuit,
+    QuantumRingsProvider, OptimizeQuantumCircuit, job_monitor
+)
 from quantumrings.toolkit.qiskit import QrBackendV2
 
 
@@ -16,18 +19,24 @@ from math import gcd
 def order_finding(a, N, backend):
     n_qubits = int(np.ceil(np.log(N))) + 1
     
-    qc = QuantumCircuit(n_qubits)
+    q = QuantumRegister(n_qubits)
+    c = ClassicalRegister(n_qubits)
+    qc = QuantumCircuit(q, c)
     
     #hadamard gates
-    qc.h(range(n_qubits))
+    qc.h(q)
     
+    for i in range(n_qubits - 1):
+        qc.cx(q[i], q[i + 1])
     qc.measure_all()
     
     
-    transpiled_qc = transpile(qc, backend)
+    
+    # transpiled_qc = transpile(qc, backend, optimization_level= 3)
     
     
-    job = backend.run(transpiled_qc, shots = 1024)
+    job = backend.run(qc, shots = 1024)
+    job_monitor(job, quiet = True)
     result = job.result()
     counts = result.get_counts()
 
@@ -37,7 +46,7 @@ def order_finding(a, N, backend):
     
 
 def shor_factor(N, backend):
-    for iteration in range(20): # to avoid None and get a factorization
+    while True:
         a = np.random.randint(2, N)
 
 
@@ -68,8 +77,9 @@ token = os.getenv("QUANTUM_RINGS_TOKEN")
 name = os.getenv("QUANTUM_RINGS_NAME")
 provider  = QuantumRingsProvider(token= token,
     name= name)
-backend = QrBackendV2(provider, num_qubits = 8)
+backend = provider.get_backend("scarlet_quantum_rings")
+
 provider.active_account()
 
 
-print(shor_factor(143, backend))
+print(shor_factor(11426971, backend))
