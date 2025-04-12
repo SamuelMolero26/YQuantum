@@ -16,6 +16,8 @@ from quantumrings.toolkit.qiskit import QrBackendV2
 from math import gcd
 
 
+
+
 def order_finding(a, N, backend):
     #n_qubits = int(np.ceil(np.log(N))) + 1
     #n_qubits = N.bit_length() // 2
@@ -36,10 +38,10 @@ def order_finding(a, N, backend):
     
     
     
-    # transpiled_qc = transpile(qc, backend, optimization_level= 3)
+    transpiled_qc = transpile(qc, backend, optimization_level= 3)
     
     
-    job = backend.run(qc, shots = 512)
+    job = backend.run(transpiled_qc, shots = 512)
     job_monitor(job, quiet = True)
     result = job.result()
     counts = result.get_counts()
@@ -73,7 +75,7 @@ def shor_factor(N, backend):
         factor1 = gcd(pow(a, r // 2) - 1, N)
         factor2 = gcd(pow(a, r // 2) + 1, N)
         
-        if factor1 * factor2 == N and (factor1 > 1 and factor2 > 1):
+        if factor1 * factor2 == N and factor1 > 1 and factor2 > 1:
            
             return factor1, factor2
         
@@ -91,4 +93,4 @@ backend = provider.get_backend("scarlet_quantum_rings")
 provider.active_account()
 
 
-print(shor_factor(862463409547, backend))
+print(shor_factor(899, backend))
