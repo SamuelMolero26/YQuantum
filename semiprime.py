@@ -17,7 +17,11 @@ from math import gcd
 
 
 def order_finding(a, N, backend):
-    n_qubits = int(np.ceil(np.log(N))) + 1
+    #n_qubits = int(np.ceil(np.log(N))) + 1
+    #n_qubits = N.bit_length() // 2
+    n_qubits = int(np.ceil(np.log2(N)))  # OR set a max limit like 10–15
+    n_qubits = min(n_qubits, 12)
+    #print(n_qubits)
     
     q = QuantumRegister(n_qubits)
     c = ClassicalRegister(n_qubits)
@@ -35,7 +39,7 @@ def order_finding(a, N, backend):
     # transpiled_qc = transpile(qc, backend, optimization_level= 3)
     
     
-    job = backend.run(qc, shots = 1024)
+    job = backend.run(qc, shots = 512)
     job_monitor(job, quiet = True)
     result = job.result()
     counts = result.get_counts()
@@ -46,7 +50,11 @@ def order_finding(a, N, backend):
     
 
 def shor_factor(N, backend):
+    count = 0
     while True:
+        print(count)
+        count += 1
+        
         a = np.random.randint(2, N)
 
 
@@ -66,6 +74,7 @@ def shor_factor(N, backend):
         factor2 = gcd(pow(a, r // 2) + 1, N)
         
         if factor1 * factor2 == N and (factor1 > 1 and factor2 > 1):
+           
             return factor1, factor2
         
     return None
@@ -82,4 +91,4 @@ backend = provider.get_backend("scarlet_quantum_rings")
 provider.active_account()
 
 
-print(shor_factor(11426971, backend))
+print(shor_factor(862463409547, backend))
