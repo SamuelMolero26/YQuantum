@@ -21,7 +21,7 @@ def order_finding(a, N):
     qc.measure_all()
     
     simulator = AerSimulator()
-    compiled_circuit = transpile(qc, simulator)
+    compiled_circuit = transpile(qc, simulator, optimization_level  = 3)
     result = simulator.run(compiled_circuit, shots=1024).result()
     counts = result.get_counts()
 
@@ -53,5 +53,5 @@ def shor_factor(N):
         if factor1 * factor2 == N:
             return factor1, factor2
 
-N = 299
+N = 35
 print(f"Factoring {N}:", shor_factor(N))
