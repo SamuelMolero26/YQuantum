@@ -4,6 +4,7 @@ from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 from math import gcd
 from qiskit import transpile
+import QuantumRingsLib
 
 
 
@@ -19,6 +20,8 @@ def order_finding(a, N):
     qc.h(range(n_qubits))
     
     qc.measure_all()
+    
+    
     
     simulator = AerSimulator()
     compiled_circuit = transpile(qc, simulator, optimization_level  = 3)
@@ -42,9 +45,9 @@ def shor_factor(N):
 
         r = order_finding(a, N)
 
-        # Step 4: Check if r is valid
+       # Check if r is valid
         if r is None or r % 2 != 0 or pow(a, r // 2, N) == N - 1:
-            return None  # Retry with a different 'a'
+            continue  # Retry with a different 'a'
 
 
         factor1 = gcd(pow(a, r // 2) - 1, N)
@@ -53,5 +56,5 @@ def shor_factor(N):
         if factor1 * factor2 == N and (factor1 > 1 and factor2 > 1):
             return factor1, factor2
 
-N = 35
+N = 299
 print(f"Factoring {N}:", shor_factor(N))
